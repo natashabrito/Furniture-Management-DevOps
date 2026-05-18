@@ -12,6 +12,18 @@ pipeline {
             }
         }
 
+        stage('SonarQube Analysis') {
+            steps {
+                bat 'docker run --rm -v "%WORKSPACE%:/usr/src" -e SONAR_HOST_URL="http://host.docker.internal:9000" sonarsource/sonar-scanner-cli'
+            }
+        }
+
+        stage('OWASP Dependency Check') {
+            steps {
+                bat 'docker run --rm -v "%WORKSPACE%:/src" -v "%WORKSPACE%/odc-reports:/report" -v owasp-data:/usr/share/dependency-check/data owasp/dependency-check --scan /src --format HTML --out /report'
+            }
+        }
+
         stage('Build and Start Containers') {
 
             steps {
