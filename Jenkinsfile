@@ -14,7 +14,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                bat 'docker run --rm -v "%WORKSPACE%:/usr/src" -e SONAR_HOST_URL="http://host.docker.internal:9000" sonarsource/sonar-scanner-cli'
+                bat 'docker run --rm -v "%WORKSPACE%:/usr/src" -e SONAR_HOST_URL="http://host.docker.internal:9000" -e SONAR_TOKEN="sqa_29c1000f464fc6dc12d70897fc1fa02ae406c811" sonarsource/sonar-scanner-cli'
             }
         }
 
