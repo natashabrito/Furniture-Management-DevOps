@@ -172,6 +172,60 @@ def delete_furniture(id):
     return jsonify({"message": "Furniture deleted successfully"})
 
 
+@app.route("/orders", methods=["GET"])
+def get_orders():
+    db = get_db_connection()
+    if db is None: return jsonify({"error": "DB failed"}), 500
+    cursor = db.cursor(pymysql.cursors.DictCursor)
+    
+    # Join with furniture to get the item name
+    sql = """
+    SELECT o.id, o.furniture_id, o.user_name, o.status, o.order_date, f.name as furniture_name 
+    FROM orders o 
+    JOIN furniture f ON o.furniture_id = f.id
+    ORDER BY o.order_date DESC
+    """
+    cursor.execute(sql)
+    data = cursor.fetchall()
+    db.close()
+    return jsonify(data)
+
+
+@app.route("/orders", methods=["POST"])
+def create_order():
+    data = request.json
+    db = get_db_connection()
+    if db is None: return jsonify({"error": "DB failed"}), 500
+    cursor = db.cursor()
+    
+    # 1. Create the order
+    sql_order = "INSERT INTO orders(furniture_id, user_name) VALUES(%s, %s)"
+    cursor.execute(sql_order, (data["furniture_id"], data["user_name"]))
+    
+    # 2. Decrease the quantity in furniture table
+    sql_update = "UPDATE furniture SET quantity = quantity - 1 WHERE id = %s AND quantity > 0"
+    cursor.execute(sql_update, (data["furniture_id"],))
+    
+    db.commit()
+    db.close()
+    return jsonify({"message": "Order created successfully"})
+
+
+@app.route("/orders/<int:id>/status", methods=["PUT"])
+def update_order_status(id):
+    data = request.json
+    db = get_db_connection()
+    if db is None: return jsonify({"error": "DB failed"}), 500
+    cursor = db.cursor()
+    
+    sql = "UPDATE orders SET status=%s WHERE id=%s"
+    cursor.execute(sql, (data["status"], id))
+    
+    db.commit()
+    db.close()
+    return jsonify({"message": "Order status updated"})
+
+
 if __name__ == "__main__":
 
     app.run(

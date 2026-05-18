@@ -45,3 +45,17 @@ INSERT INTO furniture (name, category, price, quantity) VALUES
 ('L-Shaped Sofa', 'Seating', 22000.00, 1),
 ('Bunk Bed', 'Bed', 17000.00, 2),
 ('Whiteboard', 'Classroom', 15000.00, 7);
+
+CREATE TABLE IF NOT EXISTS orders (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    furniture_id INT NOT NULL,
+    user_name VARCHAR(50) NOT NULL,
+    status VARCHAR(50) DEFAULT 'Processing',
+    order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (furniture_id) REFERENCES furniture(id) ON DELETE CASCADE
+);
+
+INSERT INTO orders (furniture_id, user_name, status) VALUES 
+(1, 'Alice (Dorm 101)', 'Out for Delivery'),
+(2, 'Bob (Library)', 'Processing'),
+(3, 'Charlie (Student Union)', 'Delivered');
